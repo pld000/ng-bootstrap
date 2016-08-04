@@ -25,7 +25,10 @@ import {DEMO_DIRECTIVES, DEMO_SNIPPETS} from './demos';
       </ngbd-example-box>
       <ngbd-example-box demoTitle="Custom validation" [htmlSnippet]="snippets.validation.markup" [tsSnippet]="snippets.validation.code">
         <ngbd-timepicker-validation></ngbd-timepicker-validation>      
-      </ngbd-example-box>      
+      </ngbd-example-box>
+      <ngbd-example-box demoTitle="Binding to a formatted string" [htmlSnippet]="snippets.format.markup" [tsSnippet]="snippets.format.code">
+        <ngbd-timepicker-format></ngbd-timepicker-format>      
+      </ngbd-example-box>
     </ngbd-content-wrapper>
   `,
   directives: [ContentWrapper, NgbdApiDocs, DEMO_DIRECTIVES, ExampleBoxComponent]

@@ -1,0 +1,4 @@
+<ngb-timepicker [ngModel]="timeFormat.toStructure(time)" (ngModelChange)="time = timeFormat.fromStructure($event)"></ngb-timepicker>
+<button type="button" class="btn btn-primary" (click)="resetToMidnight()">Reset to midnight</button>
+<hr>
+<pre>Selected time: {{ time }}</pre>
