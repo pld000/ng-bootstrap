@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 
 import {ModalDismissReasons} from './modal-dismiss-reasons';
+import {NgbModalStack, BASE_Z_INDEX} from './modal-stack';
 
 @Component({
   selector: 'ngb-modal-window',
@@ -19,6 +20,8 @@ import {ModalDismissReasons} from './modal-dismiss-reasons';
     'role': 'dialog',
     'tabindex': '-1',
     'style': 'display: block;',
+    '[style.z-index]': 'zIndex',
+    '[style.margin-top.rem]': 'topMargin',
     '(keyup.esc)': 'escKey($event)',
     '(click)': 'backdropClick()'
   },
@@ -31,6 +34,8 @@ import {ModalDismissReasons} from './modal-dismiss-reasons';
 export class NgbModalWindow implements OnInit,
     AfterViewInit, OnDestroy {
   private _elWithFocus: Element;  // element that is focused prior to modal opening
+  topMargin: number;
+  zIndex: number;
 
   @Input() backdrop: boolean | string = true;
   @Input() keyboard = true;
@@ -38,7 +43,7 @@ export class NgbModalWindow implements OnInit,
 
   @Output('dismiss') dismissEvent = new EventEmitter();
 
-  constructor(private _elRef: ElementRef, private _renderer: Renderer) {}
+  constructor(private _elRef: ElementRef, private _renderer: Renderer, private _modalStack: NgbModalStack) {}
 
   backdropClick(): void {
     if (this.backdrop === true) {
@@ -55,6 +60,11 @@ export class NgbModalWindow implements OnInit,
   dismiss(reason): void { this.dismissEvent.emit(reason); }
 
   stopPropagation($event: MouseEvent): void { $event.stopPropagation(); }
+
+  setLayer(layer: number) {
+    this.topMargin = layer;
+    this.zIndex = BASE_Z_INDEX + 2 * layer;
+  }
 
   ngOnInit() {
     this._elWithFocus = document.activeElement;
@@ -76,6 +86,8 @@ export class NgbModalWindow implements OnInit,
 
     this._elWithFocus = null;
     this._renderer.setElementClass(document.body, 'modal-open', false);
+
+    this._modalStack.windowClosed();
   }
 
   private _isNodeChildOfAnother(parentNode, potentialChildNode) { return parentNode.contains(potentialChildNode); }

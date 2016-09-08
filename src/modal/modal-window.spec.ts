@@ -1,14 +1,19 @@
-import {TestBed, ComponentFixture} from '@angular/core/testing';
+import {TestBed, ComponentFixture, inject} from '@angular/core/testing';
 
 import {NgbModalWindow} from './modal-window';
 import {ModalDismissReasons} from './modal-dismiss-reasons';
+import {NgbModalStack} from './modal-stack';
+import createSpyObj = jasmine.createSpyObj;
 
 describe('ngb-modal-dialog', () => {
 
   let fixture: ComponentFixture<NgbModalWindow>;
+  let mockModalStack: NgbModalStack;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({declarations: [NgbModalWindow]});
+    mockModalStack = createSpyObj('NgbModalStack', ['windowClosed']);
+    TestBed.configureTestingModule(
+        {declarations: [NgbModalWindow], providers: [{provide: NgbModalStack, useValue: mockModalStack}]});
     fixture = TestBed.createComponent(NgbModalWindow);
   });
 
@@ -39,6 +44,14 @@ describe('ngb-modal-dialog', () => {
 
       expect(fixture.nativeElement.getAttribute('role')).toBe('dialog');
       expect(dialogEl.getAttribute('role')).toBe('document');
+    });
+
+    it('should have a z-index and a top-margin depending on layer', () => {
+      fixture.componentInstance.setLayer(3);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.style.zIndex).toBe('1056');
+      expect(fixture.nativeElement.style.marginTop).toBe('3rem');
     });
   });
 
@@ -93,4 +106,10 @@ describe('ngb-modal-dialog', () => {
     });
   });
 
+  describe('destroy', () => {
+    it('should tell the modal stack when destroyed', () => {
+      fixture.componentInstance.ngOnDestroy();
+      expect(mockModalStack.windowClosed).toHaveBeenCalled();
+    });
+  });
 });

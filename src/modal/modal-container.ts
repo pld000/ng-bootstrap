@@ -25,6 +25,7 @@ class ModalContentContext {
 export class NgbModalContainer {
   private _backdropFactory: ComponentFactory<NgbModalBackdrop>;
   private _windowFactory: ComponentFactory<NgbModalWindow>;
+  private _nextLayer = 0;
 
   constructor(
       private _injector: Injector, private _renderer: Renderer, private _viewContainerRef: ViewContainerRef,
@@ -44,6 +45,7 @@ export class NgbModalContainer {
 
     if (options.backdrop !== false) {
       backdropCmptRef = this._viewContainerRef.createComponent(this._backdropFactory, 0, this._injector);
+      backdropCmptRef.instance.setLayer(this._nextLayer);
     }
     ngbModalRef = new NgbModalRef(this._viewContainerRef, windowCmptRef, backdropCmptRef);
 
@@ -51,9 +53,14 @@ export class NgbModalContainer {
     modalContentContext.dismiss = (reason: any) => { ngbModalRef.dismiss(reason); };
 
     this._applyWindowOptions(windowCmptRef.instance, options);
+    windowCmptRef.instance.setLayer(this._nextLayer);
+
+    this._nextLayer++;
 
     return ngbModalRef;
   }
+
+  windowClosed() { this._nextLayer--; }
 
   private _applyWindowOptions(windowInstance: NgbModalWindow, options: Object): void {
     ['backdrop', 'keyboard', 'size'].forEach((optionName: string) => {

@@ -19,6 +19,9 @@ import {DEMO_SNIPPETS} from './demos';
       <ngbd-example-box demoTitle="Modal with default options" [htmlSnippet]="snippets.basic.markup" [tsSnippet]="snippets.basic.code">
           <ngbd-modal-basic></ngbd-modal-basic>
       </ngbd-example-box>
+      <ngbd-example-box demoTitle="Stacked modals" [htmlSnippet]="snippets.stacked.markup" [tsSnippet]="snippets.stacked.code">
+          <ngbd-modal-stacked></ngbd-modal-stacked>
+      </ngbd-example-box>
     </ngbd-content-wrapper>
   `
 })

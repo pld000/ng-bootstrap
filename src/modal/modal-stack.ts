@@ -3,6 +3,8 @@ import {Injectable, TemplateRef} from '@angular/core';
 import {NgbModalRef} from './modal-ref';
 import {NgbModalContainer} from './modal-container';
 
+export const BASE_Z_INDEX = 1050;
+
 @Injectable()
 export class NgbModalStack {
   private modalContainer: NgbModalContainer;
@@ -15,6 +17,8 @@ export class NgbModalStack {
 
     return this.modalContainer.open(content, options);
   }
+
+  windowClosed() { this.modalContainer.windowClosed(); }
 
   registerContainer(modalContainer: NgbModalContainer) { this.modalContainer = modalContainer; }
 }

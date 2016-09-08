@@ -43,10 +43,10 @@ describe('ngb-modal', () => {
     jasmine.addMatchers({
       toHaveBackdrop: function(util, customEqualityTests) {
         return {
-          compare: function(actual) {
+          compare: function(actual, count = 1) {
             return {
-              pass: actual.querySelectorAll('ngb-modal-backdrop').length === 1,
-              message: `Expected ${actual.outerHTML} to have exactly one backdrop element`
+              pass: actual.querySelectorAll('ngb-modal-backdrop').length === count,
+              message: `Expected ${actual.outerHTML} to have exactly ${count} backdrop element(s)`
             };
           },
           negativeCompare: function(actual) {
@@ -61,6 +61,15 @@ describe('ngb-modal', () => {
       }
     });
   });
+
+  function getZIndices(element, selector): string[] {
+    const children = element.querySelectorAll(selector);
+    const result: string[] = [];
+    for (let i = 0; i < children.length; i++) {
+      result.push(children[i].style.zIndex);
+    }
+    return result;
+  }
 
   beforeEach(() => {
     TestBed.configureTestingModule({declarations: [TestComponent], imports: [NgbModalModule]});
@@ -316,6 +325,98 @@ describe('ngb-modal', () => {
 
       modalInstance.close('ok!');
       expect(document.activeElement).toBe(document.body);
+    });
+  });
+
+  describe('stacked modals', () => {
+    it('should support stacked modals', () => {
+      const modalInstance = fixture.componentInstance.open('foo');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(fixture.nativeElement).toHaveBackdrop(1);
+
+      const secondModalInstance = fixture.componentInstance.open('bar');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal(['foo', 'bar']);
+      expect(fixture.nativeElement).toHaveBackdrop(2);
+
+      secondModalInstance.close('some reason');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(fixture.nativeElement).toHaveBackdrop(1);
+
+      modalInstance.close('some reason');
+      expect(fixture.nativeElement).not.toHaveModal();
+      expect(fixture.nativeElement).not.toHaveBackdrop();
+    });
+
+    it('should dismiss stacked modals on backdrop click', () => {
+      fixture.componentInstance.open('foo').result.catch(NOOP);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(fixture.nativeElement).toHaveBackdrop(1);
+
+      fixture.componentInstance.open('bar').result.catch(NOOP);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal(['foo', 'bar']);
+      expect(fixture.nativeElement).toHaveBackdrop(2);
+
+      (<HTMLElement>fixture.nativeElement.querySelector('ngb-modal-window')).click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(fixture.nativeElement).toHaveBackdrop(1);
+
+      (<HTMLElement>fixture.nativeElement.querySelector('ngb-modal-window')).click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).not.toHaveModal();
+      expect(fixture.nativeElement).not.toHaveBackdrop();
+    });
+
+    it('should dismiss stacked modals on ESC', () => {
+      fixture.componentInstance.open('foo').result.catch(NOOP);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+
+      fixture.componentInstance.open('bar').result.catch(NOOP);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal(['foo', 'bar']);
+
+      fixture.debugElement.query(By.css('ngb-modal-window')).triggerEventHandler('keyup.esc', {});
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).toHaveModal('foo');
+
+      fixture.debugElement.query(By.css('ngb-modal-window')).triggerEventHandler('keyup.esc', {});
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement).not.toHaveModal();
+    });
+
+    it('should increment and decrement z-index of stacked modals', () => {
+      const modalInstance = fixture.componentInstance.open('foo');
+      const secondModalInstance = fixture.componentInstance.open('bar');
+      fixture.detectChanges();
+
+      expect(getZIndices(fixture.nativeElement, 'ngb-modal-window')).toEqual(['1052', '1050']);
+      expect(getZIndices(fixture.nativeElement, 'ngb-modal-backdrop')).toEqual(['1051', '1049']);
+
+      secondModalInstance.close('some reason');
+      modalInstance.close('some reason');
+
+      fixture.componentInstance.open('baz');
+      fixture.detectChanges();
+
+      expect(getZIndices(fixture.nativeElement, 'ngb-modal-window')).toEqual(['1050']);
+      expect(getZIndices(fixture.nativeElement, 'ngb-modal-backdrop')).toEqual(['1049']);
     });
   });
 });

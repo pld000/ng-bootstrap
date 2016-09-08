@@ -12,4 +12,11 @@ describe('ngb-modal-backdrop', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement).toHaveCssClass('modal-backdrop');
   });
+
+  it('should have a z-index depending on layer', () => {
+    const fixture = TestBed.createComponent(NgbModalBackdrop);
+    fixture.componentInstance.setLayer(3);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.style.zIndex).toBe('1055');
+  });
 });

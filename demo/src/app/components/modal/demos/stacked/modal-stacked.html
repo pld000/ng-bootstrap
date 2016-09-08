@@ -1,0 +1,21 @@
+<template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">Modal title</h4>
+  </div>
+  <div class="modal-body">
+    <p>One fine body&hellip;</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="open(content, 'sm')">Open stacked modal</button>
+  </div>
+</template>
+
+<ngb-alert [dismissible]="false">
+  We strongly believe that a good UI design shouldn't use stacked modals. But if your boss really wants that
+  and you don't have a choice, we support them, so you're fine.
+</ngb-alert>
+
+<button class="btn btn-lg btn-outline-primary" (click)="open(content, 'lg')">Open first modal</button>
