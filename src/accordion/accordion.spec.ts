@@ -313,6 +313,135 @@ describe('ngb-accordion', () => {
     expect(el[2]).toHaveCssClass('card-warning');
   });
 
+  describe('header', () => {
+    it('should display header', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id" [disabled]="panel.disabled">
+       <template ngbPanelHeader>{{panel.title}}</template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      const fixture = createTestComponent(testHtml);
+
+      let headers = Array.from(fixture.nativeElement.querySelectorAll('.card-header'));
+      headers.forEach(
+          (title: HTMLElement, idx: number) => { expect(title.textContent.trim()).toBe(`Panel ${idx + 1}`); });
+    });
+
+    it('should not contain a link and should not toggle when clicking on header', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id">
+       <template ngbPanelHeader>{{panel.title}}</template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      const fixture = createTestComponent(testHtml);
+
+      expect(fixture.nativeElement.querySelectorAll('.card-header a').length).toBe(0);
+
+      fixture.nativeElement.querySelectorAll('.card-header')[0].click();
+      fixture.detectChanges();
+      expectOpenPanels(fixture.nativeElement, [false, false, false]);
+    });
+
+    it('should allow toggling panels', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id">
+       <template ngbPanelHeader let-toggle="toggle"><a href (click)="!!toggle()">{{panel.title}}</a></template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      const fixture = createTestComponent(testHtml);
+
+      expect(fixture.nativeElement.querySelectorAll('.card-header a').length).toBe(3);
+
+      fixture.nativeElement.querySelectorAll('.card-header a')[0].click();
+      fixture.detectChanges();
+      expectOpenPanels(fixture.nativeElement, [true, false, false]);
+    });
+
+    it('should not allow toggling panel if disabled', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id" [disabled]="true">
+       <template ngbPanelHeader let-toggle="toggle"><a href (click)="!!toggle()">{{panel.title}}</a></template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      const fixture = createTestComponent(testHtml);
+
+      expect(fixture.nativeElement.querySelectorAll('.card-header a').length).toBe(3);
+
+      fixture.nativeElement.querySelectorAll('.card-header a')[0].click();
+      fixture.detectChanges();
+      expectOpenPanels(fixture.nativeElement, [false, false, false]);
+    });
+
+    it('should allow displaying an open/closed marker', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id">
+       <template ngbPanelHeader let-toggle="toggle" let-isOpen="isOpen">
+         <a href (click)="!!toggle()">{{isOpen() ? 'Close' : 'Open'}}</a>
+       </template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      const fixture = createTestComponent(testHtml);
+
+      fixture.nativeElement.querySelectorAll('.card-header a')[0].click();
+      fixture.detectChanges();
+
+      const links = <Array<HTMLElement>>Array.from(fixture.nativeElement.querySelectorAll('.card-header a'));
+      expect(links[0].textContent).toBe('Close');
+      expect(links[1].textContent).toBe('Open');
+      expect(links[2].textContent).toBe('Open');
+    });
+
+    it('should throw if title and header are used at the same time', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id" [title]="panel.title">
+       <template ngbPanelHeader>{{panel.title}}</template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      try {
+        createTestComponent(testHtml);
+        fail('should have throw');
+      } catch (e) {
+        // expected
+      }
+    });
+
+    it('should throw if title template and header are used at the same time', () => {
+      const testHtml = `
+    <ngb-accordion>
+     <ngb-panel *ngFor="let panel of panels" [id]="panel.id">
+       <template ngbPanelHeader>{{panel.title}}</template>
+       <template ngbPanelTitle>{{panel.title}}</template>
+       <template ngbPanelContent>{{panel.content}}</template>
+     </ngb-panel>
+    </ngb-accordion>
+    `;
+      try {
+        createTestComponent(testHtml);
+        fail('should have throw');
+      } catch (e) {
+        // expected
+      }
+    });
+  });
+
   describe('Custom config', () => {
     let config: NgbAccordionConfig;
 

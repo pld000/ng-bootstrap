@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {NGB_ACCORDION_DIRECTIVES} from './accordion';
 import {NgbAccordionConfig} from './accordion-config';
 
-export {NgbPanelChangeEvent} from './accordion';
+export {NgbPanelChangeEvent, NgbPanelHeaderContext} from './accordion';
 export {NgbAccordionConfig} from './accordion-config';
 
 @NgModule({

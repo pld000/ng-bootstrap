@@ -17,7 +17,7 @@ import {NgbTimepickerModule} from './timepicker/timepicker.module';
 import {NgbTooltipModule} from './tooltip/tooltip.module';
 import {NgbTypeaheadModule} from './typeahead/typeahead.module';
 
-export {NgbPanelChangeEvent, NgbAccordionConfig} from './accordion/accordion.module';
+export {NgbPanelChangeEvent, NgbAccordionConfig, NgbPanelHeaderContext} from './accordion/accordion.module';
 export {NgbModal, NgbModalOptions, NgbModalRef, ModalDismissReasons} from './modal/modal.module';
 export {NgbTabChangeEvent} from './tabset/tabset.module';
 export {NgbAlertConfig, NgbSelfClosingAlertConfig} from './alert/alert.module';

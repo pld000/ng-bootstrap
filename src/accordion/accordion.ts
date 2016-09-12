@@ -32,6 +32,36 @@ export class NgbPanelContent {
 }
 
 /**
+ * This directive must be used to wrap accordion panel header.
+ */
+@Directive({selector: 'template[ngbPanelHeader]'})
+export class NgbPanelHeader {
+  constructor(public templateRef: TemplateRef<any>) {}
+}
+
+/**
+ * The context available to the NgbPanelHeader directive
+ */
+export class NgbPanelHeaderContext {
+  /**
+   * @internal
+   */
+  panel: NgbPanel;
+
+  constructor(private _accordion: NgbAccordion, panel: NgbPanel) { this.panel = panel; }
+
+  /**
+   * Toggles this panel. Doesn't do anything if the panel is disabled.
+   */
+  toggle() { this._accordion.toggle(this.panel.id); }
+
+  /**
+   * Tells if this panel is open
+   */
+  isOpen() { return this._accordion.isOpen(this.panel.id); }
+}
+
+/**
  * The NgbPanel directive represents an in individual panel with the title and collapsible
  * content
  */
@@ -61,6 +91,7 @@ export class NgbPanel {
 
   @ContentChild(NgbPanelContent) contentTpl: NgbPanelContent;
   @ContentChild(NgbPanelTitle) titleTpl: NgbPanelTitle;
+  @ContentChild(NgbPanelHeader) headerTpl: NgbPanelHeader;
 }
 
 /**
@@ -94,8 +125,10 @@ export interface NgbPanelChangeEvent {
   <div class="card">
     <template ngFor let-panel [ngForOf]="panels">
       <div [class]="'card-header ' + (panel.type ? 'card-'+panel.type: type ? 'card-'+type : '')" [class.active]="isOpen(panel.id)">
-        <a tabindex="0" href (click)="!!toggle(panel.id)" [class.text-muted]="panel.disabled">
-          {{panel.title}}<template [ngTemplateOutlet]="panel.titleTpl?.templateRef"></template>          
+        <template *ngIf="panel.headerTpl" [ngTemplateOutlet]="panel.headerTpl?.templateRef" [ngOutletContext]="getHeaderContext(panel)">
+        </template>
+        <a *ngIf="!panel.headerTpl" tabindex="0" href (click)="!!toggle(panel.id)" [class.text-muted]="panel.disabled">
+          {{panel.title}}<template [ngTemplateOutlet]="panel.titleTpl?.templateRef"></template>
         </a>
       </div>
       <div class="card-block" *ngIf="isOpen(panel.id)">
@@ -123,7 +156,6 @@ export class NgbAccordion implements AfterContentChecked {
    */
   @Input() type: string;
 
-
   /**
    * A panel change event fired right before the panel toggle happens. See NgbPanelChangeEvent for payload details
    */
@@ -135,9 +167,9 @@ export class NgbAccordion implements AfterContentChecked {
   private _states: Map<string, boolean> = new Map<string, boolean>();
 
   /**
-   * A map that stores references to all panels
+   * A map that stores references to all panel header contexts (and thus panels)
    */
-  private _panelRefs: Map<string, NgbPanel> = new Map<string, NgbPanel>();
+  private _panelHeaderContexts: Map<string, NgbPanelHeaderContext> = new Map<string, NgbPanelHeaderContext>();
 
   constructor(config: NgbAccordionConfig) {
     this.type = config.type;
@@ -148,9 +180,9 @@ export class NgbAccordion implements AfterContentChecked {
    * Programmatically toggle a panel with a given id.
    */
   toggle(panelId: string) {
-    const panel = this._panelRefs.get(panelId);
+    const panelHeaderContext = this._panelHeaderContexts.get(panelId);
 
-    if (panel && !panel.disabled) {
+    if (panelHeaderContext && !panelHeaderContext.panel.disabled) {
       const nextState = !this._states.get(panelId);
       let defaultPrevented = false;
 
@@ -186,6 +218,11 @@ export class NgbAccordion implements AfterContentChecked {
    */
   isOpen(panelId: string): boolean { return this._states.get(panelId); }
 
+  /**
+   * @internal
+   */
+  getHeaderContext(panel) { return this._panelHeaderContexts.get(panel.id); }
+
   private _closeOthers(panelId: string) {
     this._states.forEach((state, id) => {
       if (id !== panelId) {
@@ -201,12 +238,18 @@ export class NgbAccordion implements AfterContentChecked {
 
   private _updateStates() {
     this._states.clear();
-    this._panelRefs.clear();
+    this._panelHeaderContexts.clear();
     this.panels.toArray().forEach((panel) => {
+      if (panel.headerTpl && panel.title) {
+        throw 'If a panel has a header template it may not have a title, and vice-versa';
+      }
+      if (panel.headerTpl && panel.titleTpl) {
+        throw 'If a panel has a header template it may not have a title template, and vice-versa';
+      }
       this._states.set(panel.id, this.activeIds.indexOf(panel.id) > -1 && !panel.disabled);
-      this._panelRefs.set(panel.id, panel);
+      this._panelHeaderContexts.set(panel.id, new NgbPanelHeaderContext(this, panel));
     });
   }
 }
 
-export const NGB_ACCORDION_DIRECTIVES = [NgbAccordion, NgbPanel, NgbPanelTitle, NgbPanelContent];
+export const NGB_ACCORDION_DIRECTIVES = [NgbAccordion, NgbPanel, NgbPanelTitle, NgbPanelContent, NgbPanelHeader];
