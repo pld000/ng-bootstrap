@@ -43,5 +43,8 @@ export class NgbModal {
    * components can be injected with an instance of the NgbActiveModal class. You can use methods on the
    * NgbActiveModal class to close / dismiss modals from "inside" of a component.
    */
-  open(content: any, options: NgbModalOptions = {}): NgbModalRef { return this._modalStack.open(content, options); }
+  // tslint:disable-next-line
+  open<C>(content: TemplateRef<any>| { new (...any): C; }, options: NgbModalOptions = {}): NgbModalRef<C> {
+    return this._modalStack.open(content, options);
+  }
 }

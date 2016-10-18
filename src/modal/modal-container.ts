@@ -32,12 +32,12 @@ export class NgbModalContainer {
     ngbModalStack.registerContainer(this);
   }
 
-  open(content: string | TemplateRef<any>, options): NgbModalRef {
+  open(content: string | TemplateRef<any>, options): NgbModalRef<any> {
     const activeModal = new NgbActiveModal();
     const contentRef = this._getContentRef(content, activeModal);
     let windowCmptRef: ComponentRef<NgbModalWindow>;
     let backdropCmptRef: ComponentRef<NgbModalBackdrop>;
-    let ngbModalRef: NgbModalRef;
+    let ngbModalRef: NgbModalRef<any>;
 
     if (options.backdrop !== false) {
       backdropCmptRef =

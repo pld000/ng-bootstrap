@@ -26,7 +26,7 @@ export class NgbActiveModal {
  * A reference to a newly opened modal.
  */
 @Injectable()
-export class NgbModalRef {
+export class NgbModalRef<C> {
   private _resolve: (result?: any) => void;
   private _reject: (reason?: any) => void;
 
@@ -34,7 +34,7 @@ export class NgbModalRef {
    * The instance of component used as modal's content.
    * Undefined when a TemplateRef is used as modal's content.
    */
-  get componentInstance(): any {
+  get componentInstance(): C {
     if (this._contentRef.componentRef) {
       return this._contentRef.componentRef.instance;
     }

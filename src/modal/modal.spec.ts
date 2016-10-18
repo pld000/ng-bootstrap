@@ -427,12 +427,12 @@ class TestComponent {
   @ViewChild('destroyableContent') tplDestroyableContent;
   @ViewChild('contentWithClose') tplContentWithClose;
   @ViewChild('contentWithDismiss') tplContentWithDismiss;
-  openedModal: NgbModalRef;
+  openedModal: NgbModalRef<any>;
 
   constructor(private modalService: NgbModal) {}
 
   open(content: string, options?: Object) {
-    this.openedModal = this.modalService.open(content, options);
+    this.openedModal = this.modalService.open(content as any, options);
     return this.openedModal;
   }
   close() {
